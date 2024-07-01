@@ -34,6 +34,7 @@ async function run() {
     const facultyCollection = client.db('BIFDT').collection('faculty');
     const testimonialCollection = client.db('BIFDT').collection('testimonial');
     const homepageContentCollection = client.db('BIFDT').collection('homepageContent');
+    const studentGalleryCollection = client.db('BIFDT').collection('studentGallery');
     //   admission api 
 
     app.post('/admission', async (req, res) => {
@@ -212,6 +213,47 @@ async function run() {
       const result = await facultyCollection.updateOne(query, updatedInfo, options);
       res.send(result);
     })
+    // student gallery api 
+    app.post('/studentGallery', async (req, res) => {
+      const info = req.body;
+      const result = await studentGalleryCollection.insertOne(info);
+      res.send(result);
+    })
+
+    app.get('/studentGallery', async (req, res) => {
+      const result = await studentGalleryCollection.find().toArray();
+      res.send(result);
+    })
+    app.get('/singleStudentGallery/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }; 
+      const result = await studentGalleryCollection.findOne(query)
+      res.send(result);
+    })
+
+    app.delete('/studentGallery/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await studentGalleryCollection.deleteOne(query);
+      res.send(result);
+    })
+
+    app.put('/updateStudentGallery/:id', async (req, res) => {
+      const data = req.body
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const options = { upsert: true }
+      const updatedInfo = {
+        $set: {
+          ...data
+        }
+      }
+      const result = await studentGalleryCollection.updateOne(query, updatedInfo, options);
+      res.send(result);
+    })
+
+     
+
     // testimonial api 
     app.post('/testimonial', async (req, res) => {
       const info = req.body;
@@ -290,7 +332,7 @@ run().catch(console.dir);
 
 
 app.get('/', (req, res) => {
-  res.send('server is ok');
+  res.send('server is okay!!');
 })
 
 app.listen(port, () => {
