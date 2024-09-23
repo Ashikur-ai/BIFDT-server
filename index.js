@@ -11,7 +11,8 @@ const bcrypt = require('bcrypt');
 app.use(cors());
 app.use(express.json());
 
-
+const sendNotification = require('./src/notifications/sendNotification')
+const sendNotificationToDevice = require('./src/notifications/putNotification')
 
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.bpilnp1.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
@@ -43,7 +44,7 @@ async function run() {
     const courseCategoryCollection = client.db('BIFDT').collection('courseCategory');
     const semesterCollection = client.db('BIFDT').collection('semester');
     const objectiveCollection = client.db('BIFDT').collection('courseObjective');
-    
+
     const usersCollection = client.db('BIFDT').collection('users');
 
 
@@ -480,7 +481,7 @@ async function run() {
     // Get comments for a specific blog
     app.get('/comments/blog/:blogId', async (req, res) => {
       const myblogId = req.params.blogId;
-      const query = { blogId:  myblogId, isShow: true}; // assuming blogId is stored as an ObjectId
+      const query = { blogId: myblogId, isShow: true }; // assuming blogId is stored as an ObjectId
       const result = await commentCollection.find(query).toArray();
       res.send(result);
     });
@@ -625,7 +626,7 @@ async function run() {
       const query = { _id: new ObjectId(id) };
       const options = { upsert: true };
       const updatedInfo = {
-        $set:{
+        $set: {
           ...data
         }
       }
@@ -715,7 +716,7 @@ async function run() {
       res.send(result);
     })
 
-    
+
     app.delete('/objectives/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -745,7 +746,8 @@ async function run() {
       res.send(result);
     })
 
-
+    app.use(sendNotification)
+    app.use(sendNotificationToDevice)
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
     // console.log("Pinged your deployment. You successfully connected to MongoDB!");
