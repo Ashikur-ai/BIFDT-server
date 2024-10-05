@@ -535,6 +535,8 @@ async function run() {
 
     // 11. User Related api
 
+   
+
     app.post('/register', async (req, res) => {
       const { name, phone, password } = req.body;
 
@@ -550,27 +552,37 @@ async function run() {
 
     app.post('/login', async (req, res) => {
       const user = req.body;
+      console.log(user.phone);
 
       const query = { phone: user.phone };
 
       const existingUser = await usersCollection.findOne(query);
+      console.log(existingUser);
 
-
-
-      if (existingUser.password == user.password) {
-        return res.send({ message: 'login successful', insertedId: 2 });
+      if (existingUser) {
+        if (existingUser.phone == user.phone) {
+          return res.send({ message: 'login successful', insertedId: 2 });
+        }
+      } else {
+        return res.send('user not found');
       }
 
-      return res.send('user not found');
 
+      
 
-
-
+      
 
     })
 
     app.get('/users', async (req, res) => {
       const result = await usersCollection.find().toArray();
+      res.send(result);
+    })
+
+    app.get('/users/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await usersCollection.findOne(query);
       res.send(result);
     })
 
