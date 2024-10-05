@@ -3,7 +3,7 @@ const pushNotificationService = require('../services/push-notification.services'
  
 exports.sendNotification = (req, res, next) => {
     var message = {
-        app_id: 'b74a2e58-2d75-434b-9066-d6b6232165c7',
+        app_id: ONE_SIGNAL_CONFIG.APP_ID,
         contents: { en: 'Test Push Notification' },
         included_segments: ["All"],
         content_available: true,
@@ -24,8 +24,10 @@ exports.sendNotification = (req, res, next) => {
 }
 
 exports.sendNotificationToDevice = (req, res, next) => {
+    console.log(req.body.devices);
+    
     var message = {
-        app_id: 'b74a2e58-2d75-434b-9066-d6b6232165c7',
+        app_id: ONE_SIGNAL_CONFIG.APP_ID,
         contents: { en: 'Test Push Notification' },
         included_segments: ["included_player_ids"],
         included_player_ids: req.body.devices,
