@@ -536,15 +536,14 @@ async function run() {
 
     // 11. User Related api
 
-   
+
 
     app.post('/register', async (req, res) => {
-      const { name, phone, password } = req.body;
+      const { name, email } = req.body;
 
       const user = {
         name,
-        phone,
-        password
+        email,
       };
 
       const result = await usersCollection.insertOne(user);
@@ -553,15 +552,15 @@ async function run() {
 
     app.post('/login', async (req, res) => {
       const user = req.body;
-      console.log(user.phone);
+      console.log(user.email);
 
-      const query = { phone: user.phone };
+      const query = { email: user.email };
 
       const existingUser = await usersCollection.findOne(query);
       console.log(existingUser);
 
       if (existingUser) {
-        if (existingUser.phone == user.phone) {
+        if (existingUser.email == user.email) {
           return res.send({ message: 'login successful', insertedId: 2 });
         }
       } else {
@@ -569,9 +568,9 @@ async function run() {
       }
 
 
-      
 
-      
+
+
 
     })
 
@@ -586,6 +585,12 @@ async function run() {
       const result = await usersCollection.findOne(query);
       res.send(result);
     })
+    app.get('/usersByEmail/:email', async (req, res) => {
+      const email = req.params.email;
+      const query = { email };
+      const result = await usersCollection.findOne(query);
+      res.send(result);
+    })
 
     app.delete('/users/:id', async (req, res) => {
       const id = req.params.id;
@@ -593,6 +598,14 @@ async function run() {
       const result = await usersCollection.deleteOne(query);
       res.send(result);
     })
+    
+    app.put('/users/role', async (req, res) => {
+      const { id, admin } = req.body;
+      const updatedData = { $set: { admin } }; 
+      const query = { _id: new ObjectId(id) };
+      const result = await usersCollection.updateOne(query, updatedData);
+      res.send(result);
+    });
 
 
     //11. course category api 
