@@ -30,7 +30,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
     const admissionCollection = client.db('BIFDT').collection('admission');
     const seminarCollection = client.db('BIFDT').collection('seminar');
     const seminarRequestCollection = client.db('BIFDT').collection('seminarRequest');
@@ -47,6 +47,7 @@ async function run() {
     const objectiveCollection = client.db('BIFDT').collection('courseObjective');
 
     const usersCollection = client.db('BIFDT').collection('users');
+    const appUsersCollection = client.db('BIFDT').collection('appUsers');
 
 
 
@@ -552,12 +553,10 @@ async function run() {
 
     app.post('/login', async (req, res) => {
       const user = req.body;
-      console.log(user.email);
 
       const query = { email: user.email };
 
       const existingUser = await usersCollection.findOne(query);
-      console.log(existingUser);
 
       if (existingUser) {
         if (existingUser.email == user.email) {
@@ -566,12 +565,6 @@ async function run() {
       } else {
         return res.send('user not found');
       }
-
-
-
-
-
-
     })
 
     app.get('/users', async (req, res) => {
@@ -598,16 +591,68 @@ async function run() {
       const result = await usersCollection.deleteOne(query);
       res.send(result);
     })
-    
+
     app.put('/users/role', async (req, res) => {
       const { id, admin } = req.body;
-      const updatedData = { $set: { admin } }; 
+      const updatedData = { $set: { admin } };
       const query = { _id: new ObjectId(id) };
       const result = await usersCollection.updateOne(query, updatedData);
       res.send(result);
     });
+    // mobile app user endpoint 
+    app.post('/registerApp', async (req, res) => {
+      const { name, phone } = req.body;
 
+      const user = {
+        name,
+        phone
+      };
 
+      const result = await appUsersCollection.insertOne(user);
+      res.send(result);
+    })
+
+    app.post('/loginApp', async (req, res) => {
+      const user = req.body;
+      console.log(user.phone);
+
+      const query = { phone: user.phone };
+
+      const existingUser = await appUsersCollection.findOne(query);
+      console.log(existingUser);
+
+      if (existingUser) {
+        if (existingUser.phone == user.phone) {
+          return res.send({ message: 'login successful', insertedId: 2 });
+        }
+      } else {
+        return res.send('user not found');
+      }
+    })
+
+    app.get('/usersApp', async (req, res) => {
+      const result = await appUsersCollection.find().toArray();
+      res.send(result);
+    })
+
+    app.get('/usersApp/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await appUsersCollection.findOne(query);
+      res.send(result);
+    })
+    app.get('/usersByPhone/:phone', async (req, res) => {
+      const phone = req.params.phone;
+      const query = { phone: phone };
+      const result = await appUsersCollection.findOne(query);
+      res.send(result);
+    })
+    app.delete('/usersApp/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await appUsersCollection.deleteOne(query);
+      res.send(result);
+    })
     //11. course category api 
     app.post('/courseCategory', async (req, res) => {
       const data = req.body;
@@ -763,8 +808,8 @@ async function run() {
     app.use(sendNotification)
     app.use(sendNotificationToDevice)
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    // await client.db("admin").command({ ping: 1 });
+    // console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
